@@ -183,15 +183,6 @@ def gen_full_name(case=None, gender=None, gender_bias=GENDER_BIAS,
     gns = []
     return name
 
-#print gen_full_name(gender='m')
-
-# for x in range(0, 100):
-#      myName = gen_full_name(gender=None)
-#      pp.pprint(myName)
-#      print '\n\n'
-#      #print str(x) + ': ' + myName['gender'] + ' ' + myName['last_then_first'] + '  =  ' + myName['first_to_last']
-#      #print gen_first_name()['given_name'] + ' ' + gen_last_name()['last_name']
-
 def gen_personal_email(first_name, last_name):
     domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 
                'icloud.com', 'aol.com', 'outlook.com']
@@ -324,118 +315,6 @@ def gen_school(state):
     state_colleges = colleges[state]
     if state_colleges:
         return state_colleges[random.randrange(0, len(state_colleges))]
-
-def gen_account_clearing_type():
-    seed = random.randrange(1, 100)
-    if seed < 80:
-        return "Direct"
-    elif seed > 80 and seed < 96:
-        return "Pershing"
-    else:
-        return "NFS"
-
-def gen_account_type(clearing="Direct"):
-    seed = random.randrange(1, 100)
-    if seed < 40:
-        return "Individual"
-    elif seed > 40 and seed < 50:
-        return "Joint"
-    elif seed > 50 and seed < 60:
-        return "Trust"
-    elif seed > 60 and seed < 70:
-        return "Roth IRA"
-    elif seed > 70 and seed < 90:
-        return "Retirement"
-    elif seed < 90 and seed < 95:
-        return "Estate"
-    else:
-        return "Guardian"
-def gen_account_sub_type(account_type):
-    seed = random.randrange(1, 100)
-    if account_type == 'Individual':
-        if seed < 90:
-            return ""
-        elif seed > 90:
-            return "TBD"
-    elif account_type == 'Joint':
-        if seed < 60:
-            return 'Joint WROS'
-        elif seed > 60 and seed < 75:
-            return 'Tenants in Common'
-        elif seed > 75 and seed < 85:
-            return 'Community Property'
-        else:
-            return 'Tenants in Entirety'
-    elif account_type == 'Trust':
-        if seed < 60:
-            return ''
-        elif seed > 60 and seed < 75:
-            return 'Trust Under Will'
-        elif seed > 75 and seed < 85:
-            return 'Trust Under Agreement'
-        else:
-            return 'UTMA'
-    elif account_type == 'Roth IRA':
-        return ""
-    elif account_type == 'Retirement':
-        if seed < 60:
-            return 'Individual 401(K)'
-        elif seed > 60 and seed < 75:
-            return 'Simple 401(K)'
-        elif seed > 75 and seed < 85:
-            return 'Joint WROS'
-        else:
-            return ''
-    else:  return ''
-
-def gen_account_shortname(first, last, type):
-    sname = last[:9]
-    sname = sname + first[:10-len(sname)]
-    return sname.upper()
-
-def gen_account_status():
-    seed = random.randrange(1, 100)
-    if seed < 80:
-        return "Active"
-    elif seed > 80 and seed < 95:
-        return "Terminated"
-    else:
-        return "Dormant"
-
-def gen_account_number(clearing=''):
-    if clearing == 'Direct':
-        acct = ''
-        acct_len = random.randrange(8, 12)
-        for x in range(acct_len):
-            if x < 3:
-                isLetter = random.randrange(1, 10)
-                if isLetter < 3:
-                    irandom = random.choice(string.ascii_letters)
-                    acct = acct + irandom
-                else:
-                    num = random.randrange(0, 9)
-                    acct = acct + str(num)
-            else:
-                num = random.randrange(0, 9)
-                acct = acct + str(num)
-        return acct.upper()
-    else:
-        acct = ''
-        for x in range(9):
-            if x < 3:
-                isLetter = random.randrange(1, 10)
-                if isLetter < 6:
-                    irandom = random.choice(string.ascii_letters)
-                    if irandom.upper() in ['O', 'I']:
-                        irandom = 'W'
-                    acct = acct + irandom
-                else:
-                    num = random.randrange(1, 9)
-                    acct = acct + str(num)
-            else:
-                num = random.randrange(0, 9)
-                acct = acct + str(num)
-        return acct.upper()
 
 def gen_phone_number():
     area_code = random.randrange(100, 799)
