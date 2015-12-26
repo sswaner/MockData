@@ -32,34 +32,24 @@ stateNamexRef = {'Mississippi': 'MS', 'Iowa': 'IA', 'Oklahoma': 'OK',
     'North Carolina': 'NC', 'New York': 'NY', 'District of Columbia': 'DC',
     'Nevada': 'NV', 'Maine': 'ME'}
 
-stateCodeList = stateNamexRef = ['MS', 'IA', 'OK',
-    'WY', 'MN', 'IL', 'AR',
-    'NM', 'IN', 'MD', 'LA',
-    'TX', 'AZ', 'WI', 'MI',
-    'KS', 'UT', 'VA', 'OR',
-    'CT', 'MT', 'CA', 'MA',
-    'WV', 'DE', 'NH', 'VT',
-    'GA', 'ND', 'HI', 'PA',
-    'FL', 'AK', 'KY',
-    'TN', 'SC', 'NE', 'MO',
-    'OH', 'AL', 'RI', 'SD',
-    'CO', 'ID', 'NJ', 'WA',
-    'NC', 'NY',
-    'NV', 'ME']
+stateCodeList = [
+    'MS', 'IA', 'OK', 'WY', 
+    'MN', 'IL', 'AR', 'NM', 
+    'IN', 'MD', 'LA', 'TX', 
+    'AZ', 'WI', 'MI', 'KS', 
+    'UT', 'VA', 'OR', 'CT', 
+    'MT', 'CA', 'MA', 'WV', 
+    'DE', 'NH', 'VT', 'GA', 
+    'ND', 'HI', 'PA', 'FL', 
+    'AK', 'KY', 'TN', 'SC', 
+    'NE', 'MO', 'OH', 'AL', 
+    'RI', 'SD', 'CO', 'ID', 
+    'NJ', 'WA', 'NC', 'NY',
+    'NV', 'ME'
+]
 
-
-# def gen_last_name(ucase=2, lcase=2, compound_name=False):
-def gen_last_name(**kwargs):
-    # for k, v in kwargs.items():
-    #     print('{0} {1}'.format(k, v))
-    compound_name = kwargs.get('compound_name', False)
-    use_census_distribution = kwargs.get('use_census_distribution', True)
-    # print(kwargs)
-    # if 'compound_name' in kwargs.items():
-    #     print('yes')
-    # print('compound_name', compound_name)
-    ucase = kwargs.get('ucase', 2)
-    lcase = kwargs.get('lcase', 2)
+def gen_last_name(ucase=2, lcase=2, 
+                  compound_name=False, use_census_distribution=True):
     gen_name = {}
     
     ln = None
@@ -104,10 +94,7 @@ def gen_last_name(**kwargs):
     x = None
     return gen_name
 
-def gen_first_name(**kwargs):
-    gender = kwargs.get('gender', False)
-    ucase = kwargs.get('ucase', 2)
-    lcase = kwargs.get('lcase', 2)
+def gen_first_name(ucase=2, lcase=2, gender=False):
     gen_name = {}
     ln = None
     x = random.randrange(0, 90040)
@@ -206,7 +193,8 @@ def gen_full_name(case=None, gender=None, gender_bias=GENDER_BIAS,
 #      #print gen_first_name()['given_name'] + ' ' + gen_last_name()['last_name']
 
 def gen_personal_email(first_name, last_name):
-    domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'icloud.com', 'aol.com', 'outlook.com']
+    domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 
+               'icloud.com', 'aol.com', 'outlook.com']
 
     x = random.randrange(0, len(domains))
 
@@ -270,21 +258,25 @@ def gen_favorites(gender="f"):
     religion = ''
     drink = ''
 
-    cuisines = ['American', 'Italian', 'Mexican', '???', 'French', 'Japanese', 'Chinese', 'italian',
-            'Tex/Mex', 'Seafood', 'anything', 'mexican', '', '', 'none', '' ]
-    desserts = ['Apple Pie', 'Ice Cream', '', '', '', '', 'Cheesecake', 'pumpkin pie',
-            'Yogurt', 'Fruit', 'Chocolate Cake']
-    music_genres = ['Classical', 'jazz', 'Jazz', 'country', 'Country/Western', 'punk', 'punk-rock',
-            'disco', '', '', '', 'Pop', 'rock', 'Rock and Roll', '', 'Hip-Hop']
-    religions = ['', '', '', '', '', '', 'Baptist', 'Catholic', 'Methodist', 'Jewish',
-        'atheist', 'None', 'Baptist', 'Lutheran', 'Unitarian', 'Presbyterian', 'catholic',
-        'Buddhist' ]
-    snacks = ['peanuts', 'twinkies', 'Gummy Bears', "M&M's", 'pretzels', '', '', '', '', 'Chocolate Chip Cookies',
-        'Oreo''s', 'Swedish Fish', 'Goldfish', 'Chocolate', 'Chocolate', 'chocolate',
-        'Candy', 'Snickers', 'Apples', 'Bananas', 'banana', 'chips', 'almonds' ]
+    cuisines = ['American', 'Italian', 'Mexican', '???', 'French', 'Japanese', 
+                'Chinese', 'italian', 'Tex/Mex', 'Seafood', 'anything', 
+                'mexican', '', '', 'none', '' ]
+    desserts = ['Apple Pie', 'Ice Cream', '', '', '', '', 'Cheesecake', 
+                'pumpkin pie', 'Yogurt', 'Fruit', 'Chocolate Cake']
+    music_genres = ['Classical', 'jazz', 'Jazz', 'country', 'Country/Western', 
+                    'punk', 'punk-rock', 'disco', '', '', '', 'Pop', 'rock', 
+                    'Rock and Roll', '', 'Hip-Hop']
+    religions = ['', '', '', '', '', '', 'Baptist', 'Catholic', 'Methodist', 
+                 'Jewish', 'atheist', 'None', 'Baptist', 'Lutheran', 'Unitarian', 
+                 'Presbyterian', 'catholic', 'Buddhist' ]
+    snacks = ['peanuts', 'twinkies', 'Gummy Bears', "M&M's", 'pretzels', '', 
+              '', '', '', 'Chocolate Chip Cookies', 'Oreo''s', 'Swedish Fish', 
+              'Goldfish', 'Chocolate', 'Chocolate', 'chocolate', 'Candy', 
+              'Snickers', 'Apples', 'Bananas', 'banana', 'chips', 'almonds' ]
     drinks = ['Coffee', 'Coffee', 'coffee', 'tea', 'Tea', 'Red Bull', 'Monster',
-        '', '', '', 'Coke', 'Coke Zero', 'Pepsi', 'Diet Coke', 'Coke', 'Pepsi',
-        'Water', 'water', 'Orange Juice', 'Espresso', 'Ice Tea', 'Lemonade']
+              '', '', '', 'Coke', 'Coke Zero', 'Pepsi', 'Diet Coke', 'Coke', 
+              'Pepsi', 'Water', 'water', 'Orange Juice', 'Espresso', 'Ice Tea', 
+              'Lemonade']
     cuisine = cuisines[random.randrange(0, len(cuisines))]
     dessert = desserts[random.randrange(0, len(desserts))]
     music = music_genres[random.randrange(0, len(music_genres))]
@@ -292,8 +284,9 @@ def gen_favorites(gender="f"):
     snack = snacks[random.randrange(0, len(snacks))]
     drink = drinks[random.randrange(0, len(drinks))]
 
-    favorites = {'cuisine' : cuisine, 'dessert' : dessert, 'music' : music,
-        'snack' : snack, 'hobby' : hobby, 'religion' : religion, 'drink' : drink }
+    favorites = {'cuisine' : cuisine, 'dessert' : dessert, 
+                 'music' : music, 'snack' : snack, 'hobby' : hobby, 
+                 'religion' : religion, 'drink' : drink }
 
     return favorites
 
