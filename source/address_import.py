@@ -47,7 +47,8 @@ def load_addresses(addresses, data_file_path):
 def load_FOIA_Participants_FY_2010():
     load_count = 0
     skip_count = 0
-    with codecs.open(source_path + 'FOIA_Participants_FY_2010.csv', encoding = 'ISO-8859-2') as csvfile:
+    with codecs.open(source_path + 'FOIA_Participants_FY_2010.csv', 
+                    encoding = 'ISO-8859-2') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if row['Country'] == 'United States':
@@ -72,8 +73,6 @@ def load_churches(skip_PO_boxes = True):
     with codecs.open(source_path + 'churches.csv', encoding = 'windows-1252') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            country_list = count_names(country_list, row['State Name'])
-         
             address = {'street1' : cleanse_street1(row['Street1']), 
                         'city' : row['City'], 
                         'state_code' :row.get('State Code', ''), 
@@ -81,7 +80,7 @@ def load_churches(skip_PO_boxes = True):
 
             if address not in addresses:
                 if skip_PO_boxes & detect_PO_Box(row["Street1"]):
-                    pass
+                    skip_count += 1
                 else:
                     addresses.append(address)
                     load_count += 1
@@ -93,7 +92,8 @@ def load_churches(skip_PO_boxes = True):
 def load_hotels():
     load_count = 0
     skip_count = 0
-    with codecs.open(source_path + 'hotels.csv', encoding = 'ISO-8859-2') as csvfile:
+    with codecs.open(source_path + 'hotels.csv', 
+            encoding = 'ISO-8859-2') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             count_names(country_list, row['Country_Code'])
@@ -111,44 +111,64 @@ def load_hotels():
 
     return (load_count, skip_count)
 
-def load_hotels():
+def load_hospital_data():
     load_count = 0
     skip_count = 0
     with open(source_path + 'hospital-data.csv') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['Country_Code'] == 'US':
-                address = {'street1' : cleanse_street1(row['Address 1']), 
-                            'city' : row['City'], 
-                            'state_code' :row.get('State', ''), 
-                            'postal_code' : row['ZIP Code']
-                            }
-                if address not in addresses:
-                    addresses.append(address)
-                    load_count += 1
-                else:
-                    skip_count += 1
+
+            address = {'street1' : cleanse_street1(row['Address 1']), 
+                        'city' : row['City'], 
+                        'state_code' :row.get('State', ''), 
+                        'postal_code' : row['ZIP Code']
+                        }
+            if address not in addresses:
+                addresses.append(address)
+                load_count += 1
+            else:
+                skip_count += 1
 
     return (load_count, skip_count)
 
-# import operator
-
-# for (k, v) in sorted(country_list.items(), key=lambda x: x[1], reverse = True):
-#     print('"' + k + '"\t' + str(v))
-
-t1 = time.time()
 addresses = load_addresses(addresses, source_path + 'address.json')
-t2 = time.time()
-print(t2 - t1)
-# counts = load_FOIA_Participants_FY_2010()
-counts = load_hotels()
-pprint(country_list)
+t1 = time.time()
+print('Loading hospital-data.csv')
+counts = load_hospital_data()
 print('source_count: ', len(addresses))
 print('load_count: ', str(counts[0]))
 print('skip_count: ', str(counts[1]))
+t2 = time.time()
+print('load time: ', str(t2-t1))
 
-# md = [address for address in addresses if address['state_code'] == 'MD']
+t1 = time.time()
+print('Loading FOIA_Participants_FY_2010.csv')
+counts = load_FOIA_Participants_FY_2010()
+print('source_count: ', len(addresses))
+print('load_count: ', str(counts[0]))
+print('skip_count: ', str(counts[1]))
+t2 = time.time()
+print('load time: ', str(t2-t1))
 
-# f = open(source_path + 'address.json', 'w+')
-# json.dump(addresses, f)
-# f.close()
+
+t1 = time.time()
+print('Loading hotels.csv')
+counts = load_hotels()
+print('source_count: ', len(addresses))
+print('load_count: ', str(counts[0]))
+print('skip_count: ', str(counts[1]))
+t2 = time.time()
+print('load time: ', str(t2-t1))
+
+t1 = time.time()
+print('Loading churches.csv')
+counts = load_churches()
+print('source_count: ', len(addresses))
+print('load_count: ', str(counts[0]))
+print('skip_count: ', str(counts[1]))
+t2 = time.time()
+print('load time: ', str(t2-t1))
+
+f = open(source_path + 'address.json', 'w+')
+json.dump(addresses, f)
+f.close()

@@ -1,11 +1,23 @@
 from config import source_path
 from pprint import pprint
 import json
+import time
 
+t1 = time.time()
 f = open(source_path + 'address.json')
 foo = json.load(f)
 # pprint(foo)
 f.close()
+t2 = time.time()
+
+deserialize_time = t2 - t1
+state_addresses = {}
+t1 = time.time()
+sa = open(source_path + 'state-address.json')
+state_addresses = json.load(sa)
+t2 = time.time()
+deserialize_time = t2 - t1
+
 import random
 
 stateCodeList = stateNamexRef = ['MS', 'IA', 'OK',
@@ -20,8 +32,8 @@ stateCodeList = stateNamexRef = ['MS', 'IA', 'OK',
     'TN', 'SC', 'NE', 'MO',
     'OH', 'AL', 'RI', 'SD',
     'CO', 'ID', 'NJ', 'WA',
-    'NC', 'NY',
-    'NV', 'ME']
+    'NC', 'NY', 
+    'NV', 'ME', 'DC']
 
 
 
@@ -31,9 +43,41 @@ def test1():
 
 	state_list = [x for x in foo if x['state_code'] == state_code]
 	x = random.randrange(0, len(state_list) -1)
-	print (state_list[x])
+	# print (state_list[x])
+
+def test2():
+    scx = random.randrange(0, len(stateCodeList) -1)
+    state_code = stateCodeList[scx]
+    try:
+        x = random.randrange(0, len(state_addresses[state_code]) -1)
+    except:
+        print(state_code)
+        raise
+    return state_addresses[state_code][x]
+
+def reload_and_parse():
+    for state in stateCodeList:
+        state_addresses[state] = []
 
 
+    for address in foo:
+        if address['state_code'] in stateCodeList:
+            state_addresses[address['state_code']].append(address)
 
-for i in range(300000):
+    f = open(source_path + 'state-addresses.json', 'w+')
+    json.dump(state_addresses, f)
+    f.close()
+t1 = time.time()
+for i in range(1000000):
 	test1()
+t2 = time.time()
+print('test1: ', str(t2-t1))
+print('-' * 80)
+
+t1 = time.time()
+for i in range(1000000):
+    test2()
+t2 = time.time()
+print('test2: ', str(t2-t1))
+# print('time: ', str(t2-t1))
+print('deserialize_time: ', deserialize_time)
