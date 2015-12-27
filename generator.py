@@ -48,6 +48,10 @@ stateCodeList = [
     'NV', 'ME'
 ]
 
+sa = open(source_path + 'state-address.json')
+state_addresses = json.load(sa)
+
+
 def gen_last_name(ucase=2, lcase=2, 
                   compound_name=False, use_census_distribution=True):
     gen_name = {}
@@ -200,14 +204,23 @@ def gen_personal_email(first_name, last_name):
 
     return n + domains[x]
 
-def gen_address(state):
-    pkf = open(config.pickle_path + 'addresses.pkl', 'rb')
-    addresses = pickle.load(pkf)
-    pkf.close()
-    sublist = [address for address in addresses
-            if address['state'] == state]
-    x = random.randrange(0, len(sublist))
-    return sublist[x]
+def gen_address(state=None):
+    # pkf = open(config.pickle_path + 'addresses.pkl', 'rb')
+    # addresses = pickle.load(pkf)
+    # pkf.close()
+    # sublist = [address for address in addresses
+    #         if address['state'] == state]
+    # x = random.randrange(0, len(sublist))
+    if state:
+        if state in state_addresses:
+            sc = len(state_addresses[])
+            x = random.randrange(0, sc - 1)
+            return state_addresses[x]
+        else:
+            raise ValueError('Unknown State Code')
+
+
+    return address
 
 def gen_employer(state):
     print(config.pickle_path)

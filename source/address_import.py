@@ -4,12 +4,26 @@ import sys
 from pprint import pprint
 import json
 import hashlib
-from config import source_path, pickle_path
+from config import source_path, pickle_path, data_path
 import time
 import datetime
 
-country_list = {}
+state_count = {}
 addresses = []
+
+state_list = {'DC': 'District of Columbia', 
+    'NH': 'New Hampshire', 'VT': 'Vermont', 'OH': 'Ohio', 'MA': 'Massachusetts', 
+    'NC': 'North Carolina', 'AL': 'Alabama', 'PR': 'Puerto Rico', 
+    'IL': 'Illinois', 'MD': 'Maryland', 'NE': 'Nebraska', 'MS': 'Mississippi', 
+    'NY': 'New York', 'UT': 'Utah', 'IN': 'Indiana', 'IA': 'Iowa', 'NV': 'Nevada', 
+    'ME': 'Maine', 'WY': 'Wyoming', 'CA': 'California', 'NJ': 'New Jersey', 'HI': 
+    'Hawaii', 'TX': 'Texas', 'CT': 'Connecticut', 'OK': 'Oklahoma', 'MN': 'Minnesota', 
+    'KS': 'Kansas', 'FL': 'Florida', 'OR': 'Oregon', 'MO': 'Missouri', 'SC': 'South Carolina', 
+    'ID': 'Idaho', 'DE': 'Delaware', 'TN': 'Tennessee', 'VA': 'Virginia', 'MT': 'Montana', 
+    'WA': 'Washington', 'WI': 'Wisconsin', 'AZ': 'Arizona', 'MI': 'Michigan', 
+    'AR': 'Arkansas', 'SD': 'South Dakota', 'KY': 'Kentucky', 'CO': 'Colorado', 
+    'ND': 'North Dakota', 'NM': 'New Mexico', 'PA': 'Pennsylvania', 'WV': 'West Virginia', 
+    'RI': 'Rhode Island', 'AK': 'Alaska', 'LA': 'Louisiana', 'GA': 'Georgia'}
 
 def get_hash(val):
     hash_object = hashlib.sha256(val.encode('utf-8'))
@@ -17,7 +31,12 @@ def get_hash(val):
 
 def count_names(data_list, data_value):
     if data_value in data_list:
-        data_list[data_value] += 1
+        try:
+            data_list[data_value] += 1
+        except:
+            # print(data_list)
+            print(data_value)
+            raise
     else:
         data_list[data_value] = 1
     return data_list
@@ -58,35 +77,43 @@ def load_FOIA_Participants_FY_2010():
                             'state_code' :row.get('State Code', ''), 
                             'postal_code' : row['ZIP Code'], 
                             'country' : row['Country']}
-
-                if address not in addresses:
-                    addresses.append(address)
+                if address['state_code'] not in addresses:
+                    continue
+                if address not in addresses[address['state_code']]:
+                    addresses[address['state_code']].append(address)
                     load_count += 1
+                    count_names(state_count, address['state_code'])
                 else:
                     skip_count += 1
 
     return (load_count, skip_count)
 
 def load_churches(skip_PO_boxes = True):
+    print(source_path)
     load_count = 0
     skip_count = 0
+    row_count = 0
     with codecs.open(source_path + 'churches.csv', encoding = 'windows-1252') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             address = {'street1' : cleanse_street1(row['Street1']), 
                         'city' : row['City'], 
-                        'state_code' :row.get('State Code', ''), 
+                        'state_code' :row.get('State', '').strip(), 
                         'postal_code' : row['Zip']}
-
-            if address not in addresses:
+            if address['state_code'] not in addresses:
+                # print('no state: ', address['state_code'])
+                continue
+            if address not in addresses[address['state_code']]:
                 if skip_PO_boxes & detect_PO_Box(row["Street1"]):
                     skip_count += 1
                 else:
-                    addresses.append(address)
+                    addresses[address['state_code']].append(address)
                     load_count += 1
+                    count_names(state_count, address['state_code'])
             else:
                 skip_count += 1
-
+            row_count += 1
+    print("row_count: ", row_count)
     return (load_count, skip_count)
 
 def load_hotels():
@@ -96,16 +123,19 @@ def load_hotels():
             encoding = 'ISO-8859-2') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            count_names(country_list, row['Country_Code'])
+            
             if row['Country_Code'] == 'US':
                 address = {'street1' : cleanse_street1(row['Street1']), 
                             'city' : row['City'], 
                             'state_code' :row.get('State', ''), 
                             'postal_code' : row['PostalCode'], 
                             'country' : row['Country_Code']}
-                if address not in addresses:
-                    addresses.append(address)
+                if address['state_code'] not in addresses:
+                    continue
+                if address not in addresses[address['state_code']]:
+                    addresses[address['state_code']].append(address)
                     load_count += 1
+                    count_names(state_count, address['state_code'])
                 else:
                     skip_count += 1
 
@@ -120,18 +150,33 @@ def load_hospital_data():
 
             address = {'street1' : cleanse_street1(row['Address 1']), 
                         'city' : row['City'], 
-                        'state_code' :row.get('State', ''), 
+                        'state_code' :row.get('State', '').strip(), 
                         'postal_code' : row['ZIP Code']
                         }
-            if address not in addresses:
-                addresses.append(address)
+            if address['state_code'] not in addresses:
+                print('no state:', address['state_code'])
+                continue
+            if address not in addresses[address['state_code']]:
+                addresses[address['state_code']].append(address)
+                count_names(state_count, address['state_code'])
                 load_count += 1
             else:
                 skip_count += 1
 
     return (load_count, skip_count)
 
-addresses = load_addresses(addresses, source_path + 'address.json')
+addresses = {}
+
+
+#### INITIAL LOAD/RELOAD
+# for state in state_list.items():
+#     addresses[state[0]] = []
+
+#### APPEND
+addresses = load_addresses(addresses, data_path + 'state-address.json')
+
+####
+
 t1 = time.time()
 print('Loading hospital-data.csv')
 counts = load_hospital_data()
@@ -168,7 +213,7 @@ print('load_count: ', str(counts[0]))
 print('skip_count: ', str(counts[1]))
 t2 = time.time()
 print('load time: ', str(t2-t1))
-
-f = open(source_path + 'address.json', 'w+')
+pprint(state_count)
+f = open(data_path + 'state-address.json', 'w+')
 json.dump(addresses, f)
 f.close()

@@ -55,6 +55,10 @@ def test2():
         raise
     return state_addresses[state_code][x]
 
+def test3():
+    for state in stateCodeList:
+        print(state, len(state_addresses[state]))
+
 def reload_and_parse():
     for state in stateCodeList:
         state_addresses[state] = []
@@ -67,17 +71,17 @@ def reload_and_parse():
     f = open(source_path + 'state-addresses.json', 'w+')
     json.dump(state_addresses, f)
     f.close()
-t1 = time.time()
-for i in range(1000000):
-	test1()
-t2 = time.time()
-print('test1: ', str(t2-t1))
-print('-' * 80)
+# t1 = time.time()
+# for i in range(1000):
+# 	test1()
+# t2 = time.time()
+# print('test1: ', str(t2-t1))
+# print('-' * 80)
 
 t1 = time.time()
-for i in range(1000000):
-    test2()
+# for i in range(1000):
+test3()
 t2 = time.time()
-print('test2: ', str(t2-t1))
+print('test3: ', str(t2-t1))
 # print('time: ', str(t2-t1))
 print('deserialize_time: ', deserialize_time)
