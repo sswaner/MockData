@@ -147,7 +147,7 @@ if __name__ == "__main__":
     'VT' : 626042,
     'WY' : 586107,}
 
-    baz = {'UT' : 4, 'WY' : 3, 'CA' : 93}
+    baz = {'UT' : 1, 'WY' : 2, 'CA' : 3}
 
     def count_names(data_list, data_value):
         if data_value in data_list:

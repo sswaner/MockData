@@ -43,10 +43,14 @@ def count_names(data_list, data_value):
 
 def cleanse_street1(val):
     suites = [", SUITE", ", STE", " Ste ", ", #", ', Suite', ' STE ']
+    new_val = val
     for suite in suites:
         if suite in val:
-            return val.split(suite)[0]
-    return val
+            new_val = val.split(suite)[0]
+
+    if ' RM ' in new_val:
+        new_val = new_val.split(" RM ")[0]
+    return new_val
 
 def detect_PO_Box(val):
     if val.upper().startswith("PO BOX "):
@@ -165,6 +169,73 @@ def load_hospital_data():
 
     return (load_count, skip_count)
 
+def load_locaddr(skip_PO_boxes = True):
+    print(source_path)
+    load_count = 0
+    skip_count = 0
+    row_count = 0
+    with codecs.open(source_path + 'locaddr.csv', encoding = 'ascii') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            address = {'street1' : cleanse_street1(row['LOCATION_STREET1']), 
+                        'city' : row['LOCATION_CITY'], 
+                        'state_code' :row.get('LOCATION_STATE', '').strip(), 
+                        'postal_code' : row['LOCATION_ZIP']}
+            if address['state_code'] not in addresses:
+                # print('no state: ', address['state_code'])
+                continue
+            if " & " in address['street1']:
+                ### exclude intersections i.e. 34th & Broadway
+                skip_count += 1
+                continue
+            if address not in addresses[address['state_code']]:
+                if skip_PO_boxes & detect_PO_Box(row["LOCATION_STREET1"]):
+                    skip_count += 1
+                else:
+                    addresses[address['state_code']].append(address)
+                    load_count += 1
+                    count_names(state_count, address['state_code'])
+            else:
+                skip_count += 1
+            row_count += 1
+    print("row_count: ", row_count)
+    return (load_count, skip_count)
+
+def load_mailaddr(skip_PO_boxes = True):
+    print(source_path)
+    load_count = 0
+    skip_count = 0
+    row_count = 0
+    with codecs.open(source_path + 'mailaddr.csv', encoding = 'ascii') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            address = {'street1' : cleanse_street1(row['MAILING_STREET1']), 
+                        'city' : row['MAILING_CITY'], 
+                        'state_code' :row.get('MAILING_STATE', '').strip(), 
+                        'postal_code' : row['MAILING_ZIP']}
+            if address['state_code'] not in addresses:
+                # print('no state: ', address['state_code'])
+                continue
+            if " & " in address['street1']:
+                ### exclude intersections i.e. 34th & Broadway
+                skip_count += 1
+                continue
+            address['street1'] = cleanse_street1(address['street1'])
+            if address not in addresses[address['state_code']]:
+                if skip_PO_boxes & detect_PO_Box(row["MAILING_STREET1"]):
+                    skip_count += 1
+                else:
+                    addresses[address['state_code']].append(address)
+                    load_count += 1
+                    count_names(state_count, address['state_code'])
+            else:
+                skip_count += 1
+            row_count += 1
+    print("row_count: ", row_count)
+    return (load_count, skip_count)
+
+
+
 addresses = {}
 
 
@@ -177,42 +248,62 @@ addresses = load_addresses(addresses, data_path + 'state-address.json')
 
 ####
 
+# t1 = time.time()
+# print('Loading hospital-data.csv')
+# counts = load_hospital_data()
+# print('source_count: ', len(addresses))
+# print('load_count: ', str(counts[0]))
+# print('skip_count: ', str(counts[1]))
+# t2 = time.time()
+# print('load time: ', str(t2-t1))
+
+# t1 = time.time()
+# print('Loading FOIA_Participants_FY_2010.csv')
+# counts = load_FOIA_Participants_FY_2010()
+# print('source_count: ', len(addresses))
+# print('load_count: ', str(counts[0]))
+# print('skip_count: ', str(counts[1]))
+# t2 = time.time()
+# print('load time: ', str(t2-t1))
+
+
+# t1 = time.time()
+# print('Loading hotels.csv')
+# counts = load_hotels()
+# print('source_count: ', len(addresses))
+# print('load_count: ', str(counts[0]))
+# print('skip_count: ', str(counts[1]))
+# t2 = time.time()
+# print('load time: ', str(t2-t1))
+
+# t1 = time.time()
+# print('Loading churches.csv')
+# counts = load_churches()
+# print('source_count: ', len(addresses))
+# print('load_count: ', str(counts[0]))
+# print('skip_count: ', str(counts[1]))
+# t2 = time.time()
+# print('load time: ', str(t2-t1))
+
+# t1 = time.time()
+# print('Loading locaddr.csv')
+# counts = load_locaddr()
+# print('source_count: ', len(addresses))
+# print('load_count: ', str(counts[0]))
+# print('skip_count: ', str(counts[1]))
+# t2 = time.time()
+# print('load time: ', str(t2-t1))
+
 t1 = time.time()
-print('Loading hospital-data.csv')
-counts = load_hospital_data()
+print('Loading mailaddr.csv')
+counts = load_mailaddr()
 print('source_count: ', len(addresses))
 print('load_count: ', str(counts[0]))
 print('skip_count: ', str(counts[1]))
 t2 = time.time()
 print('load time: ', str(t2-t1))
 
-t1 = time.time()
-print('Loading FOIA_Participants_FY_2010.csv')
-counts = load_FOIA_Participants_FY_2010()
-print('source_count: ', len(addresses))
-print('load_count: ', str(counts[0]))
-print('skip_count: ', str(counts[1]))
-t2 = time.time()
-print('load time: ', str(t2-t1))
 
-
-t1 = time.time()
-print('Loading hotels.csv')
-counts = load_hotels()
-print('source_count: ', len(addresses))
-print('load_count: ', str(counts[0]))
-print('skip_count: ', str(counts[1]))
-t2 = time.time()
-print('load time: ', str(t2-t1))
-
-t1 = time.time()
-print('Loading churches.csv')
-counts = load_churches()
-print('source_count: ', len(addresses))
-print('load_count: ', str(counts[0]))
-print('skip_count: ', str(counts[1]))
-t2 = time.time()
-print('load time: ', str(t2-t1))
 pprint(state_count)
 f = open(data_path + 'state-address.json', 'w+')
 json.dump(addresses, f)

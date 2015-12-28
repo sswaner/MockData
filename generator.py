@@ -1,12 +1,14 @@
 from MockData.names_list import last_names, female_names, male_names
 import random
 import pprint
+import json
 import MockData.config as config
 import pickle
 import datetime
 import unicodedata
 import string
 import random
+from MockData.config import source_path, data_path
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -48,7 +50,7 @@ stateCodeList = [
     'NV', 'ME'
 ]
 
-sa = open(source_path + 'state-address.json')
+sa = open(data_path + 'state-address.json')
 state_addresses = json.load(sa)
 
 
@@ -213,9 +215,9 @@ def gen_address(state=None):
     # x = random.randrange(0, len(sublist))
     if state:
         if state in state_addresses:
-            sc = len(state_addresses[])
+            sc = len(state_addresses[state])
             x = random.randrange(0, sc - 1)
-            return state_addresses[x]
+            return state_addresses[state][x]
         else:
             raise ValueError('Unknown State Code')
 
