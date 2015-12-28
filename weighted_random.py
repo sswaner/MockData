@@ -7,8 +7,11 @@ def _rpick(index, array, lookup=_id):
     low = 0
     high = len(array) - 1
     while True:
-        # If index is between two values, pick the higher one
-        if high - low == 1: return high
+        if high == low:
+            return high
+        elif high - low == 1 and (index >= lookup(array[low]) 
+                             and index <= lookup(array[high])):
+            return high
         pivot = (low + high) // 2
         value = lookup(array[pivot])
         if index < value:
@@ -159,7 +162,7 @@ if __name__ == "__main__":
         return data_list
 
     ####  foo/bar/baz
-    test_set = bar
+    test_set = baz
 
     t = StateWeightedRandom(test_set)
     counter = {}
