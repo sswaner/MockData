@@ -1,5 +1,9 @@
 # MockData
 
+## Mapping Service
+
+See [the README](service/README.md) in the `service/` subdirectory.
+
 ## Data Sources
 
 ### Addresses
