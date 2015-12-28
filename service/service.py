@@ -20,27 +20,30 @@ def _before():
 
 @app.teardown_request
 def _teardown(exception=None):
-    g.r.close()
+    del g.r
 
 def cache_wrapper_for(type_name, key_fun, getter, setter):
     def _wrap(fun):
         @functools.wraps(fun)
         def wrapper(*args, **kwargs):
             key = key_fun(*args, **kwargs)
-            exists, value = lookup(key)
+            exists, value = getter(key)
             if exists: return value
             value = fun(*args, **kwargs)
             setter(key, value)
             return value
+        return wrapper
     _wrap.__name__ = type_name + "_wrapper"
     return _wrap
 
 def cache_redis(key_fun):
+    def redis_set(key, value):
+        g.r.set(key, value)
     def redis_lookup(key):
         result = g.r.get(key)
         if result is None: return False, ""
         return True, result
-    return cache_wrapper_for("redis", key_fun, redis_lookup, g.r.set)
+    return cache_wrapper_for("redis", key_fun, redis_lookup, redis_set)
 
 def cache_debug(key_fun):
     table = {}
@@ -60,7 +63,6 @@ def key_for(dataset, type, value):
 
 def cache_type(type):
     def keyfun(ds, **kwargs):
-        print(kwargs.keys())
         assert len(kwargs.keys()) == 1
         value = list(kwargs.values())[0].lower()
         return key_for(ds, type, value)
