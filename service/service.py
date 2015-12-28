@@ -2,7 +2,6 @@ import os
 import sys
 import functools
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from MockData import generator as gen
 import redis
 import hashlib
@@ -23,7 +22,7 @@ def _before():
 def _teardown(exception=None):
     g.r.close()
 
-def cache_wrapper_for(type_name, getter, setter):
+def cache_wrapper_for(type_name, key_fun, getter, setter):
     def _wrap(fun):
         @functools.wraps(fun)
         def wrapper(*args, **kwargs):
@@ -36,12 +35,24 @@ def cache_wrapper_for(type_name, getter, setter):
     _wrap.__name__ = type_name + "_wrapper"
     return _wrap
 
-def cache(key_fun):
+def cache_redis(key_fun):
     def redis_lookup(key):
         result = g.r.get(key)
         if result is None: return False, ""
         return True, result
-    return cache_wrapper_for("redis", redis_lookup, g.r.set)
+    return cache_wrapper_for("redis", key_fun, redis_lookup, g.r.set)
+
+def cache_debug(key_fun):
+    table = {}
+    def debug_lookup(key):
+        if key not in table: return False, ""
+        return True, table[key]
+    def debug_setter(key, value):
+        table[key] = value
+    return cache_wrapper_for("debug", key_fun, debug_lookup, debug_setter)
+
+def cache(key_fun):
+    return cache_redis(key_fun)
 
 def key_for(dataset, type, value):
     key_str = (":".join((dataset, type, value)))
