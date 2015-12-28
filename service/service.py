@@ -2,29 +2,46 @@ import os
 import sys
 import functools
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-print(sys.path)
+
 from MockData import generator as gen
-
+import redis
 import hashlib
-
 from flask import Flask, request, g
+import json
 
 app = Flask(__name__)
 
 table = {}
 
-def cache(key_fun):
-    def decorator(fun):
+@app.before_request
+def _before():
+    g.r = redis.StrictRedis(host=app.config.get("REDIS_HOST", "localhost"),
+                            port=app.config.get("REDIS_PORT", 6379),
+                            db=app.config.get("REDIS_DB", 0))
+
+@app.teardown_request
+def _teardown(exception=None):
+    g.r.close()
+
+def cache_wrapper_for(type_name, getter, setter):
+    def _wrap(fun):
         @functools.wraps(fun)
         def wrapper(*args, **kwargs):
             key = key_fun(*args, **kwargs)
-            if key in table: 
-                return table[key]
+            exists, value = lookup(key)
+            if exists: return value
             value = fun(*args, **kwargs)
-            table[key] = value
+            setter(key, value)
             return value
-        return wrapper
-    return decorator
+    _wrap.__name__ = type_name + "_wrapper"
+    return _wrap
+
+def cache(key_fun):
+    def redis_lookup(key):
+        result = g.r.get(key)
+        if result is None: return False, ""
+        return True, result
+    return cache_wrapper_for("redis", redis_lookup, g.r.set)
 
 def key_for(dataset, type, value):
     key_str = (":".join((dataset, type, value)))
