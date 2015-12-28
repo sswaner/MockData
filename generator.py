@@ -220,7 +220,12 @@ def gen_address(state=None):
             return state_addresses[state][x]
         else:
             raise ValueError('Unknown State Code')
+    else:
+        scl = random.randrange(0, len(stateCodeList))
+        state = stateCodeList[scl]
 
+        x = random.randrange(0, len(state_addresses[state]))
+        return state_addresses[state][x]
 
     return address
 
