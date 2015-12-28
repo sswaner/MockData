@@ -14,9 +14,9 @@ table = {}
 
 @app.before_request
 def _before():
-    g.r = redis.StrictRedis(host=app.config.get("REDIS_HOST", "localhost"),
-                            port=app.config.get("REDIS_PORT", 6379),
-                            db=app.config.get("REDIS_DB", 0))
+    g.r = redis.StrictRedis(host=app.config["REDIS_HOST"],
+                            port=app.config["REDIS_PORT"],
+                            db=app.config["REDIS_DB"])
 
 @app.teardown_request
 def _teardown(exception=None):
@@ -87,4 +87,9 @@ def address(ds, state, address):
 
 if __name__ == "__main__":
     app.debug = True
+    app.config.update(
+        REDIS_HOST=os.environ.get("REDIS_HOST", "localhost"),
+        REDIS_PORT=int(os.environ.get("REDIS_PORT", 6379)),
+        REDIS_DB=int(os.environ.get("REDIS_DB", 0))
+    )
     app.run()
