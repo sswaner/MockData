@@ -7,10 +7,10 @@ First install redis, and make sure `redis-server` is in your path.
 ### Setup the Service
 
 ```bash
-$ mkdir .virtualenv
-$ virtualenv .virtualenv
-$ source .virtualenv/bin/activate
-$ pip3 install -r requirements.txt
+mkdir .virtualenv
+virtualenv .virtualenv
+source .virtualenv/bin/activate
+pip3 install -r requirements.txt
 ```
 
 ### Run the Service
