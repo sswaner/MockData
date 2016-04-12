@@ -217,6 +217,7 @@ def gen_address(state=None):
         if state in state_addresses:
             sc = len(state_addresses[state])
             x = random.randrange(0, sc - 1)
+            # print(state_addresses[state])
             return state_addresses[state][x]
         else:
             raise ValueError('Unknown State Code')
@@ -348,10 +349,38 @@ def gen_SSN():
     phone2 = random.randrange(1000, 9999)
     return str(area_code) + "-" + str(phone1) + "-" + str(phone2)
 
+def gen_bank_account():
+    num_len = random.randrange(7, 12)
+    x = 1
+    for i in range(num_len):
+        x = x * 10
+    x = x - 1
+    account_number = random.randrange(1, x)
+    first_letter_seed = 22  #the percentage of account numbers with 1-2 initial letters.
+    f = random.randrange(0, 99)
+    if f <= first_letter_seed:
+        account_number = 'AB' + str(account_number)
+    return str(account_number)
+
+def gen_drivers_license():
+    num_len = random.randrange(7, 12)
+    x = 1
+    for i in range(num_len):
+        x = x * 10
+    x = x - 1
+    account_number = random.randrange(1, x)
+    first_letter_seed = 22  #the percentage of account numbers with 1-2 initial letters.
+    f = random.randrange(0, 99)
+    if f <= first_letter_seed:
+        account_number = random.choice(string.ascii_letters).upper() + str(account_number)
+    if f < (first_letter_seed / 2):
+        account_number = random.choice(string.ascii_letters).upper() + str(account_number)
+    return str(account_number)
+
 if __name__ == '__main__':
-    print('10 random names')
+    # print('10 random names')
+    # for i in range(10):
+    #     print(gen_full_name())    
+    # print('10 names matching distribution')
     for i in range(10):
-        print(gen_full_name())    
-    print('10 names matching distribution')
-    for i in range(10):
-        print(gen_full_name())
+        print(gen_bank_account())

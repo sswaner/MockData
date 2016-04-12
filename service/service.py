@@ -72,20 +72,69 @@ def cache_type(type):
 @app.route("/dataset/<ds>/given-name/<name>")
 @cache_type("given-name")
 def given_name(ds, name):
-    return gen.gen_first_name()["given_name"]
+    x = {'given-name' :  gen.gen_first_name()["given_name"]}
+    return json.dumps(x)
 
 @app.route("/dataset/<ds>/surname/<name>")
 @cache_type("surname")
 def surname(ds, name):
-    return gen.gen_last_name()["last_name"]
+    x = {'surname' : gen.gen_last_name()["last_name"]}
+    return json.dumps(x)
 
 def _address_keyfun(ds, state, address):
     return key_for(ds, "address", ":".join((state, address)))
 
+def _address1_keyfun(ds, address):
+    return key_for(ds, "address", ":".join((address)))
+
+def _full_name_keyfun(ds, full_name):
+    return key_for(ds, "full_name", ":".join((full_name)))
+
+def _ssn_keyfun(ds, ssn):
+    return key_for(ds, "ssn", ":".join(ssn))
+
+def _bank_keyfun(ds, accountnumber):
+    return key_for(ds, "banknumber", ":".join(accountnumber))
+
+def _driver_license_keyfun(ds, licensenumber):
+    return key_for(ds, "licensenumber", ":".join(licensenumber))
+
 @app.route("/dataset/<ds>/address/<state>/<path:address>")
 @cache(_address_keyfun)
 def address(ds, state, address):
-    return gen.gen_address(state)
+    if state.upper() in ['AE', 'AO', 'AP']:
+        new_state = gen.gen_address('HI')
+        new_state['state_code'] = state
+        return json.dumps(new_state)
+    return json.dumps(gen.gen_address(state))
+
+@app.route("/dataset/<ds>/ssn/<ssn>")
+@cache(_ssn_keyfun)
+def ssn(ds, ssn):
+    new_ssn = {'ssn' : gen.gen_SSN()}
+    return json.dumps(new_ssn)
+
+@app.route("/dataset/<ds>/address/<path:address>")
+@cache(_address1_keyfun)
+def address1(ds, address):
+    return json.dumps(gen.gen_address(state=None))
+
+@app.route("/dataset/<ds>/full_name/<path:full_name>")
+@cache(_full_name_keyfun)
+def full_name(ds, full_name):
+    return json.dumps({'name' : gen.gen_full_name()['first_to_last']})
+
+@app.route("/dataset/<ds>/bankaccountnumber/<accountnumber>")
+@cache(_bank_keyfun)
+def bank_account_number(ds, accountnumber):
+    new_account_number = {'bank_account_number' : gen.gen_bank_account()}
+    return json.dumps(new_account_number)
+
+@app.route("/dataset/<ds>/driverslicense/<licensenumber>")
+@cache(_driver_license_keyfun)
+def drivers_license(ds, licensenumber):
+    new_license_number = {'drivers_license_number' : gen.gen_drivers_license()}
+    return json.dumps(new_license_number)
 
 if __name__ == "__main__":
     app.debug = True
@@ -94,4 +143,4 @@ if __name__ == "__main__":
         REDIS_PORT=int(os.environ.get("REDIS_PORT", 6379)),
         REDIS_DB=int(os.environ.get("REDIS_DB", 0))
     )
-    app.run()
+    app.run(host="0.0.0.0", port=5000)

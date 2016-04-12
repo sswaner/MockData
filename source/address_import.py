@@ -73,7 +73,10 @@ def append_address(address):
     if detect_PO_Box(address['state_code']):
         return False
     address['street1'] = cleanse_street1(address['street1'])
-     
+
+    for (k, v) in address.items():
+        address[k] = address[k].title()
+    address['state_code'] = address['state_code'].upper()
     if address not in addresses[address['state_code']]:
         addresses[address['state_code']].append(address)
         count_names(state_count, address['state_code'])
@@ -193,9 +196,6 @@ def load_mailaddr(skip_PO_boxes = True):
                         'city' : row['MAILING_CITY'], 
                         'state_code' :row.get('MAILING_STATE', '').strip(), 
                         'postal_code' : row['MAILING_ZIP']}
-            if address['state_code'] not in addresses:
-                # print('no state: ', address['state_code'])
-                continue
             if " & " in address['street1']:
                 ### exclude intersections i.e. 34th & Broadway
                 skip_count += 1
