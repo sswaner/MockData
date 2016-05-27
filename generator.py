@@ -377,6 +377,9 @@ def gen_drivers_license():
         account_number = random.choice(string.ascii_letters).upper() + str(account_number)
     return str(account_number)
 
+def gen_credit_card_number():
+    return str(random.randrange(1000000000000000, 9999999999999999))
+
 if __name__ == '__main__':
     # print('10 random names')
     # for i in range(10):
