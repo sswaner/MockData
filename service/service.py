@@ -99,6 +99,9 @@ def _bank_keyfun(ds, accountnumber):
 def _driver_license_keyfun(ds, licensenumber):
     return key_for(ds, "licensenumber", ":".join(licensenumber))
 
+def _credit_card_keyfun(ds, creditcardnumber):
+    return key_for(ds, "creditcardnumber", ":".join(creditcardnumber))
+
 @app.route("/dataset/<ds>/address/<state>/<path:address>")
 @cache(_address_keyfun)
 def address(ds, state, address):
@@ -135,6 +138,13 @@ def bank_account_number(ds, accountnumber):
 def drivers_license(ds, licensenumber):
     new_license_number = {'drivers_license_number' : gen.gen_drivers_license()}
     return json.dumps(new_license_number)
+
+@app.route("/dataset/<ds>/creditcardnumber/<creditcardnumber>")
+@cache(_credit_card_keyfun)
+def creditcardnumber(ds, creditcardnumber):
+    new_card_number = {'credit_card_number' : gen.gen_credit_card_number()}
+    return json.dumps(new_card_number)
+
 
 if __name__ == "__main__":
     app.debug = True
