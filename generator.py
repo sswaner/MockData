@@ -387,13 +387,81 @@ def _luhn_total(num):
     return total
 
 def luhn_check(num):
+    """Returns true if the number has a valid luhn checksum"""
     return _luhn_total(num) % 10 == 0
 
 def luhn_gen(num):
+    """Returns the check digit for the given number"""
     return (_luhn_total(num + "0") * 9) % 10
 
+def _cc_range(ranges):
+    """Generates a flat list of numbers from a list of individual numbers
+        and (start, stop) pairs."""
+    o_range = []
+    for r in ranges:
+        try:
+            start, end = r
+            o_range.extend(list(range(start, end+1)))
+        except TypeError:
+            o_range.append(r)
+    return o_range 
+
+def cc(name, BINs, lengths, checksum=True):
+    BINs = _cc_range(BINs)
+    lengths = _cc_range(lengths)
+    def _cc_gen():
+        card_len = random.choice(lengths)
+        BIN = str(random.choice(BINs))
+        account_num_len = card_len - len(BIN)
+        if checksum:
+            account_num_len -= 1
+        account_num = random.randrange(0, (10 ** (account_num_len + 1)) - 1)
+        card_num = BIN + str(account_num)
+        if checksum:
+            card_num += str(luhn_gen(card_num))
+        return card_num
+    _cc_gen.__name__ = name
+    return _cc_gen
+
+# All information from: https://en.wikipedia.org/wiki/Payment_card_number
+CC_TYPES_INACTIVE = [
+    cc("Bankcard", [5610, (560221, 560225)], [16]),
+    cc("Diners Club enRoute", [2014, 2149], [15], checksum=False),
+    cc("Laser", [6304, 6706, 6771, 6709], [(16, 19)]),
+    cc("MasterCard", [(2221, 2720)], [16]),
+    cc("Solo", [6334, 6767], [16, 18, 19]),
+    cc("Switch", [4903, 4905, 4911, 4936, 564182, 633110, 6333, 6759], [16, 18, 19])
+]
+
+CC_TYPES_ACTIVE = [
+    cc("American Express", [34, 37], [16]),
+    cc("China UnionPay", [62], [(16, 19)]),
+    cc("Diners Club Carte Blanche", [(300, 305)], [14]),
+    cc("Diners Club International", 
+            [(300, 305), 309, 36, 38, 39], [14]),
+    cc("Discover Card",
+            [6011, (622126, 622925), (644, 649), 65], [16, 19]),
+    cc("InterPayment", [636], [(16, 19)]),
+    cc("InstaPayment", [(637,639)], [16]),
+    cc("JCB", [(3528, 3589)], [16]),
+    cc("Maestro", [50, (56, 69)], [(12, 19)]),
+    cc("Dankort", [5019], [16]),
+    cc("Dankort + Visa", [4, 4175, 4571], [16]),
+    cc("NSPK MIR", [(2200, 2204)], [16]),
+    cc("MasterCard", [(51, 55)], [16]),
+    cc("Visa", [4], [13, 16, 19]),
+    cc("UATP", [1], [15]),
+    cc("Verve", [(506099, 506198), (650002, 650027)], [16, 19]),
+    cc("CARDGUARD EAD BG ILS", [5392], [16])
+]
+
+# There could be many better sampling methods, for example sampling according
+# to popular distribution of cards. I imagine there are many more visas than
+# "InterPayment" cards, at least in the U.S.
+# Even sampling according to the possible number of unique cards would probably
+# be better.
 def gen_credit_card_number():
-    return str(random.randrange(1000000000000000, 9999999999999999))
+    return random.choice(CC_TYPES_ACTIVE)()
 
 if __name__ == '__main__':
     # print('10 random names')
