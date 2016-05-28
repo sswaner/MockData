@@ -377,6 +377,21 @@ def gen_drivers_license():
         account_number = random.choice(string.ascii_letters).upper() + str(account_number)
     return str(account_number)
 
+def _luhn_total(num):
+    digits = [int(x) for x in str(num)]
+    total = sum(digits[-1::-2])
+    for digit in digits[-2::-2]:
+        digit *= 2
+        if digit > 9: digit -= 9
+        total += digit
+    return total
+
+def luhn_check(num):
+    return _luhn_total(num) % 10 == 0
+
+def luhn_gen(num):
+    return (_luhn_total(num + "0") * 9) % 10
+
 def gen_credit_card_number():
     return str(random.randrange(1000000000000000, 9999999999999999))
 
