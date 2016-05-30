@@ -114,7 +114,7 @@ def address(ds, state, address):
 @app.route("/dataset/<ds>/ssn/<ssn>")
 @cache(_ssn_keyfun)
 def ssn(ds, ssn):
-    new_ssn = {'ssn' : gen.gen_SSN()}
+    new_ssn = {'ssn' : gen.gen_ssn()}
     return json.dumps(new_ssn)
 
 @app.route("/dataset/<ds>/address/<path:address>")

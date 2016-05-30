@@ -1,63 +1,68 @@
-from MockData.names_list import last_names, female_names, male_names
+"""Mock Data Generator"""
+import sys
+import os
 import random
-import pprint
 import json
-import MockData.config as config
 import pickle
 import datetime
-import unicodedata
 import string
-import random
-from MockData.config import source_path, data_path
+import math
 
-pp = pprint.PrettyPrinter(indent=4)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from MockData.names_list import last_names, female_names, male_names
+import MockData.config as config
+
+from MockData.config import data_path
 
 GENDER_BIAS = 53
-last_name = {'last_name' : None, 'case' : None }
-first_name = {'given_name' : None, 'case' : None, 'gender' : None, 'ordinal' : 0  }
-full_name = { 'first_to_last' : None, 'last_then_first' : None,  'gender' : None,
-              'given_names' : [], 'surname' : None }
+# LAST_NAME = {'last_name' : None, 'case' : None}
+# FIRST_NAME = {'given_name' : None, 'case' : None, 'gender' : None, 'ordinal' : 0}
+# FULL_NAME = {'first_to_last' : None, 'last_then_first' : None,
+#              'gender' : None,
+#              'given_names' : [], 'surname' : None}
 
 
 stateNamexRef = {'Mississippi': 'MS', 'Iowa': 'IA', 'Oklahoma': 'OK',
-    'Wyoming': 'WY', 'Minnesota': 'MN', 'Illinois': 'IL', 'Arkansas': 'AR',
-    'New Mexico': 'NM', 'Indiana': 'IN', 'Maryland': 'MD', 'Louisiana': 'LA',
-    'Texas': 'TX', 'Arizona': 'AZ', 'Wisconsin': 'WI', 'Michigan': 'MI',
-    'Kansas': 'KS', 'Utah': 'UT', 'Virginia': 'VA', 'Oregon': 'OR',
-    'Connecticut': 'CT', 'Montana': 'MT', 'California': 'CA', 'Massachusetts': 'MA',
-    'West Virginia': 'WV', 'Delaware': 'DE', 'New Hampshire': 'NH', 'Vermont': 'VT',
-    'Georgia': 'GA', 'North Dakota': 'ND', 'Hawaii': 'HI', 'Pennsylvania': 'PA',
-    'Puerto Rico': 'PR', 'Florida': 'FL', 'Alaska': 'AK', 'Kentucky': 'KY',
-    'Tennessee': 'TN', 'South Carolina': 'SC', 'Nebraska': 'NE', 'Missouri': 'MO',
-    'Ohio': 'OH', 'Alabama': 'AL', 'Rhode Island': 'RI', 'South Dakota': 'SD',
-    'Colorado': 'CO', 'Idaho': 'ID', 'New Jersey': 'NJ', 'Washington': 'WA',
-    'North Carolina': 'NC', 'New York': 'NY', 'District of Columbia': 'DC',
-    'Nevada': 'NV', 'Maine': 'ME'}
+                 'Wyoming': 'WY', 'Minnesota': 'MN', 'Illinois': 'IL', 'Arkansas': 'AR',
+                 'New Mexico': 'NM', 'Indiana': 'IN', 'Maryland': 'MD', 'Louisiana': 'LA',
+                 'Texas': 'TX', 'Arizona': 'AZ', 'Wisconsin': 'WI', 'Michigan': 'MI',
+                 'Kansas': 'KS', 'Utah': 'UT', 'Virginia': 'VA', 'Oregon': 'OR',
+                 'Connecticut': 'CT', 'Montana': 'MT', 'California': 'CA', 'Massachusetts': 'MA',
+                 'West Virginia': 'WV', 'Delaware': 'DE', 'New Hampshire': 'NH', 'Vermont': 'VT',
+                 'Georgia': 'GA', 'North Dakota': 'ND', 'Hawaii': 'HI', 'Pennsylvania': 'PA',
+                 'Puerto Rico': 'PR', 'Florida': 'FL', 'Alaska': 'AK', 'Kentucky': 'KY',
+                 'Tennessee': 'TN', 'South Carolina': 'SC', 'Nebraska': 'NE', 'Missouri': 'MO',
+                 'Ohio': 'OH', 'Alabama': 'AL', 'Rhode Island': 'RI', 'South Dakota': 'SD',
+                 'Colorado': 'CO', 'Idaho': 'ID', 'New Jersey': 'NJ', 'Washington': 'WA',
+                 'North Carolina': 'NC', 'New York': 'NY', 'District of Columbia': 'DC',
+                 'Nevada': 'NV', 'Maine': 'ME'}
 
-stateCodeList = [
-    'MS', 'IA', 'OK', 'WY', 
-    'MN', 'IL', 'AR', 'NM', 
-    'IN', 'MD', 'LA', 'TX', 
-    'AZ', 'WI', 'MI', 'KS', 
-    'UT', 'VA', 'OR', 'CT', 
-    'MT', 'CA', 'MA', 'WV', 
-    'DE', 'NH', 'VT', 'GA', 
-    'ND', 'HI', 'PA', 'FL', 
-    'AK', 'KY', 'TN', 'SC', 
-    'NE', 'MO', 'OH', 'AL', 
-    'RI', 'SD', 'CO', 'ID', 
+STATE_CODE_LIST = [
+    'MS', 'IA', 'OK', 'WY',
+    'MN', 'IL', 'AR', 'NM',
+    'IN', 'MD', 'LA', 'TX',
+    'AZ', 'WI', 'MI', 'KS',
+    'UT', 'VA', 'OR', 'CT',
+    'MT', 'CA', 'MA', 'WV',
+    'DE', 'NH', 'VT', 'GA',
+    'ND', 'HI', 'PA', 'FL',
+    'AK', 'KY', 'TN', 'SC',
+    'NE', 'MO', 'OH', 'AL',
+    'RI', 'SD', 'CO', 'ID',
     'NJ', 'WA', 'NC', 'NY',
     'NV', 'ME'
 ]
 
-sa = open(data_path + 'state-address.json')
-state_addresses = json.load(sa)
+address_data = open(data_path + 'state-address.json')
+STATE_ADDRESS_LIST = json.load(address_data)
 
 
-def gen_last_name(ucase=2, lcase=2, 
+def gen_last_name(ucase=2, lcase=2,
                   compound_name=False, use_census_distribution=True):
     gen_name = {}
-    
+
     ln = None
     cn = None
     if use_census_distribution:
@@ -70,7 +75,7 @@ def gen_last_name(ucase=2, lcase=2,
         while ln is None:
             x = random.randrange(len(last_names))
             ln = last_names[x][1]
-               
+
 
     if compound_name == True:
         xc = random.randrange(0, 905540)
@@ -94,95 +99,97 @@ def gen_last_name(ucase=2, lcase=2,
         gen_name['last_name'] = ln.swapcase()
         gen_name['case'] = 'l'
     else:
-        gen_name['last_name'] =  ln.title()
+        gen_name['last_name'] = ln.title()
         gen_name['case'] = 'p'
     gen_name['seed'] = x
     x = None
     return gen_name
 
 def gen_first_name(ucase=2, lcase=2, gender=False):
+    """Generate a random first name."""
     gen_name = {}
-    ln = None
-    x = random.randrange(0, 90040)
-    while ln is None:
+    _last_name = None
+    _male_name_seed = random.randrange(0, 90040)
+    _female_name_seed = random.randrange(0, 90024)
+    while _last_name is None:
         try:
             if gender == 'f':
-                ln = female_names[x]
+                _last_name = female_names[_female_name_seed]
             else:
-                ln = male_names[x]
+                _last_name = male_names[_male_name_seed]
         except:
-            x = x + 1
-            pass
-    u = random.randrange(0, 100)
-    if u < ucase:
-       gen_name['given_name'] = ln
-       gen_name['case'] = 'u'
-    elif u > 100 - lcase:
-        gen_name['given_name'] = ln.swapcase()
+            _male_name_seed += 1
+            _female_name_seed += 1
+
+    _random = random.randrange(0, 100)
+    if _random < ucase:
+        gen_name['given_name'] = _last_name
+        gen_name['case'] = 'u'
+    elif _random > 100 - lcase:
+        gen_name['given_name'] = _last_name.swapcase()
         gen_name['case'] = 'l'
     else:
-        gen_name['given_name'] = ln.title()
+        gen_name['given_name'] = _last_name.title()
         gen_name['case'] = 'p'
 
     return gen_name
 
+def gen_random_gender(bias=GENDER_BIAS):
+    """Internal function to randomly generate a gender."""
+    _random = random.randrange(0, 99)
+    if _random <= bias:
+        return 'f'
+    else:
+        return 'm'
 
-def gen_full_name(case=None, gender=None, gender_bias=GENDER_BIAS, 
-                  given_names=1, randomize_name_count = True):
+
+def gen_full_name(gender=None, gender_bias=GENDER_BIAS,
+                  given_names=1, randomize_name_count=True):
+    """Generates a full name, including randomizing the name count and
+    randomly including maiden names."""
     name = {}
     gns = []
     maiden_name = False
     compound_name = False
     if not gender:
-        g = random.randrange(0, 99)
-        if g <= gender_bias:
-            name['gender'] = 'f'
-        else:
-            name['gender'] = 'm'
+        name['gender'] = gen_random_gender(gender_bias)
     else:
         name['gender'] = gender
-    cn = random.randrange(1, 100)
-    if cn > 95:
-        compound_name = True
-    gn = gen_last_name(compound_name = compound_name)
-    name['surname'] = gn['last_name']
 
-    name['first_to_last'] = gn['last_name']
-    name['last_then_first'] = gn['last_name'] + ','
+    compound_name = random.randrange(1, 100) > 95
 
+    surname = gen_last_name(compound_name=compound_name)
+    name['surname'] = surname['last_name']
+    name['first_to_last'] = surname['last_name']
+    name['last_then_first'] = surname['last_name'] + ','
 
     if randomize_name_count:
         gnc = random.randrange(1, 100)
-        if gender == 'm':
-            if gnc < 50:
-                given_names = 1
-            elif gnc >= 50 and gnc <= 99:
-                given_names = 2
-            elif gnc == 100:
-                given_names = 3
-        else:
-            if gnc < 70:
-                given_names = 1
-            elif gnc >= 70 and gnc <= 90:
-                given_names = 2
+        if gnc < 70:
+            given_names = 1
+        elif gnc >= 70 and gnc <= 90:
+            given_names = 2
+            if gender == 'f':
                 maiden_name = True
-            elif gnc > 90 and gnc < 100:
-                given_names = 2
-            elif gnc == 100:
-                given_names = 3
+        elif gnc > 90 and gnc < 100:
+            given_names = 2
+        elif gnc == 100:
+            given_names = 3
     names_list = "" # used to store the names.
-    for x in range(given_names):
-        if maiden_name and x > 0:
+    for name_count in range(given_names):
+        if maiden_name and name_count > 0:
             #print 'Maiden'
-            mn = gen_last_name(compound_name = False)
-            nn =  {'given_name' : None, 'case' : None, 'gender' : None, 'ordinal' : 0  }
-            nn['given_name'] = mn['last_name']
-            nn['ordinal'] = x + 1
+            new_maiden_last_name = gen_last_name(compound_name=False)
+            new_name = {'given_name' : new_maiden_last_name['last_name'], 
+                               'case' : None, 'gender' : None, 
+                               'ordinal' : name_count + 1}
         else:
-            nn = gen_first_name(gender=name['gender'])
-            nn['ordinal'] = x + 1
-        gns.append(nn)
-        names_list = names_list + ' ' + nn['given_name']
+            new_first_name = gen_first_name(gender=name['gender'])
+            new_name = {'given_name' : new_first_name['given_name'], 
+                               'case' : None, 'gender' : name['gender'], 
+                               'ordinal' : name_count + 1}
+        gns.append(new_name)
+        names_list = names_list + ' ' + new_name['given_name']
     name['first_to_last'] = names_list + ' ' + name['surname']
     name['last_then_first'] = name['surname'] + ', ' + names_list.strip()
     name['given_names'] = gns
@@ -190,200 +197,174 @@ def gen_full_name(case=None, gender=None, gender_bias=GENDER_BIAS,
     return name
 
 def gen_personal_email(first_name, last_name):
-    domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 
+    """Generates a random email address based on the first and last names."""
+    domains = ['gmail.com', 'yahoo.com', 'hotmail.com',
                'icloud.com', 'aol.com', 'outlook.com']
 
-    x = random.randrange(0, len(domains))
+    domain_seed = random.randrange(0, len(domains))
 
-    f = random.randrange(0, 2)
-    n = ''
-    if f == 0:
-        n = '{0}.{1}@'.format(first_name, last_name)
-    elif f == 1:
-        n = '{0}{1}@'.format(first_name[:1], last_name)
+    first_seed = random.randrange(0, 2)
+    account = ''
+    if first_seed == 0:
+        account = '{0}.{1}@'.format(first_name, last_name)
+    elif first_seed == 1:
+        account = '{0}{1}@'.format(first_name[:1], last_name)
     else:
-        n = '{0}{1}@'.format(first_name, last_name[:1])
+        account = '{0}{1}@'.format(first_name, last_name[:1])
 
-    return n + domains[x]
+    return account + domains[domain_seed]
 
 def gen_address(state=None):
-    # pkf = open(config.pickle_path + 'addresses.pkl', 'rb')
-    # addresses = pickle.load(pkf)
-    # pkf.close()
-    # sublist = [address for address in addresses
-    #         if address['state'] == state]
-    # x = random.randrange(0, len(sublist))
+    """Generates a random address for the specified state."""
     if state:
-        if state in state_addresses:
-            sc = len(state_addresses[state])
-            x = random.randrange(0, sc - 1)
+        if state in STATE_ADDRESS_LIST:
+            address_list_length = len(STATE_ADDRESS_LIST[state])
+            state_seed = random.randrange(0, address_list_length - 1)
             # print(state_addresses[state])
-            return state_addresses[state][x]
+            return STATE_ADDRESS_LIST[state][state_seed]
         else:
             raise ValueError('Unknown State Code')
     else:
-        scl = random.randrange(0, len(stateCodeList))
-        state = stateCodeList[scl]
+        _random_state = random.randrange(0, len(STATE_CODE_LIST))
+        state = STATE_CODE_LIST[_random_state]
 
-        x = random.randrange(0, len(state_addresses[state]))
-        return state_addresses[state][x]
-
-    return address
+        random_seed = random.randrange(0, len(STATE_ADDRESS_LIST[state]))
+        return STATE_ADDRESS_LIST[state][random_seed]
 
 def gen_employer(state):
+    """Returns a random employer for the specified state."""
     print(config.pickle_path)
     pkf = open(config.pickle_path +'employers.pkl', "rb")
 
     employers = pickle.load(pkf)
     pkf.close()
 
-    sublist = [employer for employer in employers
-            if employer['state'] == state]
-    x = random.randrange(0, len(sublist))
-    return sublist[x]
+    sublist = [employer for employer in employers if employer['state'] == state]
+    seed = random.randrange(0, len(sublist))
+    return sublist[seed]
 
-def gen_business_email(first, last, company):
-    company = company.replace('&', ' ')
-    company = company.replace('  ', ' ')
-    y = company.split()
-    if len(y) > 3:
-        company = y[0] + y[1] #+ y[2]
-    elif len(y) > 1:
-        company = "".join([part for part in y if part != y[len(y) - 1]])
+def gen_business_email(first, last, company_name):
+    """Generates a business email address based on the persons name and employer."""
+    company_fixed = company_name.replace('&', ' ').replace('  ', ' ')
+    company_parts = company_fixed.split()
+    if len(company_parts) > 3:
+        company_domain = company_parts[0] + company_parts[1] #+ y[2]
+    elif len(company_parts) > 1:
+        company_domain = "".join([part for part in company_parts if part != company_parts[len(company_parts) - 1]])
     else:
-        company = y[0]
-    company = company.replace(", Inc.", "").replace("Inc." , "").replace("Inc", "").replace('/', '')
-    company = company.replace('|', '').replace(',', '').replace(';', '').replace("'", "").strip()
-    if len(company) > 30:
-        company = company[:20]
+        company_domain = company_parts[0]
+    company_domain_fixed = company_domain.replace(", Inc.", "").replace("Inc.", "").replace("Inc", "").replace('/', '').replace('|', '').replace(',', '').replace(';', '').replace("'", "").strip()
+    if len(company_domain_fixed) > 30:
+        company_domain_fixed = company_domain_fixed[:20]
     email = gen_personal_email(first, last)
-    email = email.split('@')[0] + '@' + company + '.com'
+    email = email.split('@')[0] + '@' + company_domain_fixed + '.com'
     email = email.replace('..', '.')
     return email
 
-def gen_favorites(gender="f"):
-    cuisine = ''
-    dessert = ''
-    music = ''
-    snack = ''
-    hobby = ''
-    religion = ''
-    drink = ''
-
-    cuisines = ['American', 'Italian', 'Mexican', '???', 'French', 'Japanese', 
-                'Chinese', 'italian', 'Tex/Mex', 'Seafood', 'anything', 
-                'mexican', '', '', 'none', '' ]
-    desserts = ['Apple Pie', 'Ice Cream', '', '', '', '', 'Cheesecake', 
-                'pumpkin pie', 'Yogurt', 'Fruit', 'Chocolate Cake']
-    music_genres = ['Classical', 'jazz', 'Jazz', 'country', 'Country/Western', 
-                    'punk', 'punk-rock', 'disco', '', '', '', 'Pop', 'rock', 
-                    'Rock and Roll', '', 'Hip-Hop']
-    religions = ['', '', '', '', '', '', 'Baptist', 'Catholic', 'Methodist', 
-                 'Jewish', 'atheist', 'None', 'Baptist', 'Lutheran', 'Unitarian', 
-                 'Presbyterian', 'catholic', 'Buddhist' ]
-    snacks = ['peanuts', 'twinkies', 'Gummy Bears', "M&M's", 'pretzels', '', 
-              '', '', '', 'Chocolate Chip Cookies', 'Oreo''s', 'Swedish Fish', 
-              'Goldfish', 'Chocolate', 'Chocolate', 'chocolate', 'Candy', 
-              'Snickers', 'Apples', 'Bananas', 'banana', 'chips', 'almonds' ]
-    drinks = ['Coffee', 'Coffee', 'coffee', 'tea', 'Tea', 'Red Bull', 'Monster',
-              '', '', '', 'Coke', 'Coke Zero', 'Pepsi', 'Diet Coke', 'Coke', 
-              'Pepsi', 'Water', 'water', 'Orange Juice', 'Espresso', 'Ice Tea', 
-              'Lemonade']
-    cuisine = cuisines[random.randrange(0, len(cuisines))]
-    dessert = desserts[random.randrange(0, len(desserts))]
-    music = music_genres[random.randrange(0, len(music_genres))]
-    religion = religions[random.randrange(0, len(religions))]
-    snack = snacks[random.randrange(0, len(snacks))]
-    drink = drinks[random.randrange(0, len(drinks))]
-
-    favorites = {'cuisine' : cuisine, 'dessert' : dessert, 
-                 'music' : music, 'snack' : snack, 'hobby' : hobby, 
-                 'religion' : religion, 'drink' : drink }
-
-    return favorites
-
 def gen_dates(birth_year=None):
+    """Generates a set of dates.  Passing birth_year ensures dates are chronological."""
     birthdate = None
-    wedding = ''
+  
 
     if birth_year:
         byear = random.randrange(birth_year - 5, birth_year + 5)
     else:
         byear = random.randrange(1944, 1992)
-    birthdate = datetime.date(byear, random.randrange(1,12), random.randrange(1,28))
+    birthdate = datetime.date(byear, random.randrange(1, 12), random.randrange(1, 28))
 
     wyear = random.randrange(byear + 18, byear + 35)
 
-    if wyear > 2012: wyear  = 2012
+    if wyear > 2012:
+        wyear = 2012
 
-    wedding = datetime.date(wyear, random.randrange(1,12), random.randrange(1, 28))
+    wedding = datetime.date(wyear, random.randrange(1, 12), random.randrange(1, 28))
 
-    results = {'birth' : birthdate, 'wedding' : wedding }
+    results = {'birth' : birthdate, 'wedding' : wedding}
 
     return results
 
 def gen_financials():
+    """Generates a random set of net worth, income and liquid asset data."""
     net_worth = random.randrange(5, 33) * 10000
     liquid_assets = net_worth / random.randrange(1, 10)
     annual_income = random.randrange(7, 42) * 5000
 
-    financials = {'net_worth' : net_worth, 'liquid_assets' : liquid_assets, 'annual_income' : annual_income }
+    financials = {'net_worth' : net_worth, 'liquid_assets' : liquid_assets,
+                  'annual_income' : annual_income}
 
     return financials
 
-def gen_school(state):
-    colleges = pickle.load(open(config.pickle_path + 'colleges.pkl', 'rb'))
-    state_colleges = colleges[state]
-    if state_colleges:
-        return state_colleges[random.randrange(0, len(state_colleges))]
-
 def gen_phone_number():
+    """Returns a random phone number."""
     area_code = random.randrange(100, 799)
-    phone1 = random.randrange(100, 999)
-    phone2 = random.randrange(1000, 9999)
-    return str(area_code) + str(phone1) + str(phone2)
-    
-def gen_SSN():
-    area_code = random.randrange(100, 799)
-    phone1 = random.randrange(10, 99)
-    phone2 = random.randrange(1000, 9999)
-    return str(area_code) + "-" + str(phone1) + "-" + str(phone2)
+    phone_1 = random.randrange(100, 999)
+    phone_2 = random.randrange(1000, 9999)
+    return str(area_code) + str(phone_1) + str(phone_2)
+
+def gen_ssn():
+    """Generates a random SSN number using a xxx-xx-xxxx mask."""
+    part_1 = random.randrange(100, 799)
+    part_2 = random.randrange(10, 99)
+    part_3 = random.randrange(1000, 9999)
+    return str(part_1) + "-" + str(part_2) + "-" + str(part_3)
 
 def gen_bank_account():
+    """Returns a random bank account number between 9 and 14 characters in 
+    length.  Some values have an appeneded text string."""
     num_len = random.randrange(7, 12)
-    x = 1
-    for i in range(num_len):
-        x = x * 10
-    x = x - 1
-    account_number = random.randrange(1, x)
+    upper_range = int(math.pow(10, num_len)-1)
+    account_number = random.randrange(1, upper_range)
     first_letter_seed = 22  #the percentage of account numbers with 1-2 initial letters.
-    f = random.randrange(0, 99)
-    if f <= first_letter_seed:
+    account_number_seed = random.randrange(0, 99)
+    if account_number_seed <= first_letter_seed:
         account_number = 'AB' + str(account_number)
     return str(account_number)
 
 def gen_drivers_license():
+    """Returns a random number between 7 and 12 characters in length."""
     num_len = random.randrange(7, 12)
-    x = 1
-    for i in range(num_len):
-        x = x * 10
-    x = x - 1
-    account_number = random.randrange(1, x)
+    upper_range = int(math.pow(10, num_len)-1)
+    account_number = random.randrange(1, upper_range)
     first_letter_seed = 22  #the percentage of account numbers with 1-2 initial letters.
-    f = random.randrange(0, 99)
-    if f <= first_letter_seed:
+    seed_value = random.randrange(0, 99)
+    if seed_value <= first_letter_seed:
         account_number = random.choice(string.ascii_letters).upper() + str(account_number)
-    if f < (first_letter_seed / 2):
+    if seed_value < (first_letter_seed / 2):
         account_number = random.choice(string.ascii_letters).upper() + str(account_number)
     return str(account_number)
 
 def gen_credit_card_number():
+    """Returns a random 16 digit numeric value, common to Visa style 
+       credit card numbers."""
     return str(random.randrange(1000000000000000, 9999999999999999))
 
 if __name__ == '__main__':
-    # print('10 random names')
-    # for i in range(10):
-    #     print(gen_full_name())    
-    # print('10 names matching distribution')
-    for i in range(10):
+    STATE_CODE_LIST_LENGTH = len(STATE_CODE_LIST)
+            
+    for i in range(3):
+        random_state = STATE_CODE_LIST[random.randrange(0, STATE_CODE_LIST_LENGTH)]
         print(gen_bank_account())
+        print(gen_credit_card_number())
+        print(gen_drivers_license())
+        print(gen_ssn())
+        print(gen_financials())
+        test_first_name = gen_first_name()
+        test_last_name = gen_last_name()
+        print(test_first_name)
+        print(test_last_name)
+        company = gen_employer(random_state)
+        print("Company:", company)
+        print(gen_business_email(test_first_name['given_name'], 
+              test_last_name['last_name'], company['company']))
+        print("Address:", gen_address(random_state))
+        print("Personal Email:", gen_personal_email(test_first_name['given_name'], 
+              test_last_name['last_name']))
+        print("Full Name:", gen_full_name())
+        print(gen_first_name(2, 2, 'f'))
+        print(gen_first_name(1, 2, 'f'))
+        print(gen_first_name(2, 1, 'f'))
+        print(gen_first_name(1, 1, 'f'))
+        print(gen_first_name(2, 2, 'm'))
+        print(gen_first_name(1, 2, 'm'))
+        print(gen_first_name(2, 1, 'm'))
+        print(gen_first_name(1, 1, 'm'))
