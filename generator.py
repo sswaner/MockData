@@ -417,13 +417,10 @@ CC_TYPES_ACTIVE = [
 # Even sampling according to the possible number of unique cards would probably
 # be better.
 def gen_credit_card_number():
-<<<<<<< HEAD
     """Returns a random 16 digit numeric value, common to Visa style 
        credit card numbers."""
-    return str(random.randrange(1000000000000000, 9999999999999999))
-=======
     return random.choice(CC_TYPES_ACTIVE)()
->>>>>>> 1e00c8951fcc3960504e03b9ae02b2922722984e
+
 
 if __name__ == '__main__':
     STATE_CODE_LIST_LENGTH = len(STATE_CODE_LIST)
