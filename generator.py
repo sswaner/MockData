@@ -144,7 +144,8 @@ def gen_random_gender(bias=GENDER_BIAS):
 
 
 def gen_full_name(gender=None, gender_bias=GENDER_BIAS,
-                  given_names=1, randomize_name_count=True):
+                  given_names=1, randomize_name_count=True,
+                  compound_name_level=101):
     """Generates a full name, including randomizing the name count and
     randomly including maiden names."""
     name = {}
@@ -156,7 +157,7 @@ def gen_full_name(gender=None, gender_bias=GENDER_BIAS,
     else:
         name['gender'] = gender
 
-    compound_name = random.randrange(1, 100) > 95
+    compound_name = random.randrange(1, 100) > compound_name_level
 
     surname = gen_last_name(compound_name=compound_name)
     name['surname'] = surname['last_name']

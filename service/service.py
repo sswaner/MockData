@@ -105,7 +105,7 @@ def _credit_card_keyfun(ds, creditcardnumber):
 @app.route("/dataset/<ds>/address/<state>/<path:address>")
 @cache(_address_keyfun)
 def address(ds, state, address):
-    if state.upper() in ['AE', 'AO', 'AP']:
+    if state.upper() not in gen.STATE_CODE_LIST:
         new_state = gen.gen_address('HI')
         new_state['state_code'] = state
         return json.dumps(new_state)
