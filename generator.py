@@ -7,14 +7,25 @@ import pickle
 import datetime
 import string
 import math
+import bisect
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from MockData.names_list import last_names, female_names, male_names
+# from MockData.names_list import last_names, female_names, male_names
+from MockData.names_list import male_name_tuples, female_name_tuples
+from MockData.names_list import last_name_tuples
+
 import MockData.config as config
 
 from MockData.config import data_path
+from MockData.data import word_lists
+
+# last_name_tuples.sort(key=lambda r: r[0])
+
+LAST_NAME_KEYS = [r[0] for r in last_name_tuples]
+MALE_NAME_KEYS = [r[0] for r in male_name_tuples]
+FEMALE_NAME_KEYS = [r[0] for r in female_name_tuples]
 
 GENDER_BIAS = 53
 # LAST_NAME = {'last_name' : None, 'case' : None}
@@ -66,6 +77,36 @@ def gen_last_name(ucase=2, lcase=2,
     ln = None
     cn = None
     if use_census_distribution:
+        x = random.randrange(1, 905441)
+        ln = last_name_tuples[bisect.bisect(LAST_NAME_KEYS, x)][1]
+
+
+    if compound_name == True:
+        xc = random.randrange(0, 905441)
+        cn = last_name_tuples[bisect.bisect(LAST_NAME_KEYS, xc)][1]
+
+        ln = ln + '-' + cn
+
+    u = random.randrange(0, 100)
+    if u < ucase:
+        gen_name['last_name'] = ln
+        gen_name['case'] = 'u'
+    elif u > 100 - lcase:
+        gen_name['last_name'] = ln.swapcase()
+        gen_name['case'] = 'l'
+    else:
+        gen_name['last_name'] = ln.title()
+        gen_name['case'] = 'p'
+    gen_name['seed'] = x
+    return gen_name
+
+def gen_last_name_v1(ucase=2, lcase=2,
+                  compound_name=False, use_census_distribution=True):
+    gen_name = {}
+
+    ln = None
+    cn = None
+    if use_census_distribution:
         while ln is None:
             x = random.randrange(0, 905540)
             for (k, v) in last_names:
@@ -108,6 +149,40 @@ def gen_last_name(ucase=2, lcase=2,
 def gen_first_name(ucase=2, lcase=2, gender=False):
     """Generate a random first name."""
     gen_name = {}
+    
+    if not gender:
+        if random.randrange(1,100) > GENDER_BIAS:
+            gender = 'f'
+        else:
+            gender = 'm'
+
+    _name = None
+    _male_name_seed = random.randrange(1, 90040)
+    _female_name_seed = random.randrange(1500, 90024) #1500?  Too many Patricia's
+    
+    if gender == 'f':
+        _name = female_name_tuples[bisect.bisect(FEMALE_NAME_KEYS, _female_name_seed)][1]
+    else:
+        _name = male_name_tuples[bisect.bisect(MALE_NAME_KEYS, _male_name_seed)][1]
+
+
+    _random = random.randrange(0, 100)
+    if _random < ucase:
+        gen_name['given_name'] = _name
+        gen_name['case'] = 'u'
+    elif _random > 100 - lcase:
+        gen_name['given_name'] = _name.swapcase()
+        gen_name['case'] = 'l'
+    else:
+        gen_name['given_name'] = _name.title()
+        gen_name['case'] = 'p'
+    gen_name['gender'] = gender
+
+    return gen_name
+
+def gen_first_name_v1(ucase=2, lcase=2, gender=False):
+    """Generate a random first name."""
+    gen_name = {}
     _last_name = None
     _male_name_seed = random.randrange(0, 90040)
     _female_name_seed = random.randrange(0, 90024)
@@ -131,7 +206,7 @@ def gen_first_name(ucase=2, lcase=2, gender=False):
     else:
         gen_name['given_name'] = _last_name.title()
         gen_name['case'] = 'p'
-
+    gen_name['gender'] = gender
     return gen_name
 
 def gen_random_gender(bias=GENDER_BIAS):
@@ -197,6 +272,21 @@ def gen_full_name(gender=None, gender_bias=GENDER_BIAS,
     gns = []
     return name
 
+def gen_random_email():
+    domains = ['gmail.com', 'yahoo.com', 'hotmail.com',
+               'icloud.com', 'aol.com', 'outlook.com']
+
+    noun_len = len(word_lists.nouns)
+    noun = word_lists.nouns[random.randrange(0, noun_len-1)]
+
+    adj_len = len(word_lists.adjectives)
+    adjective = word_lists.adjectives[random.randrange(0, adj_len-1)]
+
+    domain = domains[random.randrange(0, len(domains) - 1)]
+    account = '.'.join([adjective, noun]) + '@' + domain
+    return account
+
+
 def gen_personal_email(first_name, last_name):
     """Generates a random email address based on the first and last names."""
     domains = ['gmail.com', 'yahoo.com', 'hotmail.com',
@@ -234,7 +324,7 @@ def gen_address(state=None):
 
 def gen_employer(state):
     """Returns a random employer for the specified state."""
-    print(config.pickle_path)
+    # print(config.pickle_path)
     pkf = open(config.pickle_path +'employers.pkl', "rb")
 
     employers = pickle.load(pkf)
@@ -453,3 +543,23 @@ if __name__ == '__main__':
         print(gen_first_name(1, 2, 'm'))
         print(gen_first_name(2, 1, 'm'))
         print(gen_first_name(1, 1, 'm'))
+
+
+
+        print('-' * 80)
+
+        for i in range(10):
+            print(gen_random_email())
+        names = {}
+    for i in range(100):
+        foo = gen_first_name()
+        if foo['gender'] in names:
+            names[foo['gender']] += 1
+        else:
+            names[foo['gender']] = 1
+
+    import pprint
+    pprint.pprint(names)
+
+
+

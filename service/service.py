@@ -102,6 +102,9 @@ def _driver_license_keyfun(ds, licensenumber):
 def _credit_card_keyfun(ds, creditcardnumber):
     return key_for(ds, "creditcardnumber", ":".join(creditcardnumber))
 
+def _email_address_keyfun(ds, emailaddress):
+    return key_for(ds, "emailaddress", ":".join(emailaddress))
+
 @app.route("/dataset/<ds>/address/<state>/<path:address>")
 @cache(_address_keyfun)
 def address(ds, state, address):
@@ -144,6 +147,12 @@ def drivers_license(ds, licensenumber):
 def creditcardnumber(ds, creditcardnumber):
     new_card_number = {'credit_card_number' : gen.gen_credit_card_number()}
     return json.dumps(new_card_number)
+
+@app.route("/dataset/<ds>/emailaddress/<emailaddress>")
+@cache(_email_address_keyfun)
+def emailaddress(ds, emailaddress):
+    new_email_address = {'emailaddress' : gen.gen_random_email()}
+    return json.dumps(new_email_address)
 
 
 if __name__ == "__main__":
