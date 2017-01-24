@@ -392,9 +392,12 @@ def gen_phone_number():
     phone_2 = random.randrange(1000, 9999)
     return str(area_code) + str(phone_1) + str(phone_2)
 
-def gen_ssn():
-    """Generates a random SSN number using a xxx-xx-xxxx mask."""
-    part_1 = random.randrange(100, 799)
+def gen_ssn(region = False):
+    """Generates a random SSN number using a xxx-xx-xxxx mask."""   
+    if not region:
+        part_1 = random.randrange(100, 799)
+    else:
+        part_1 = region
     part_2 = random.randrange(10, 99)
     part_3 = random.randrange(1000, 9999)
     return str(part_1) + "-" + str(part_2) + "-" + str(part_3)

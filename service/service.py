@@ -117,8 +117,18 @@ def address(ds, state, address):
 @app.route("/dataset/<ds>/ssn/<ssn>")
 @cache(_ssn_keyfun)
 def ssn(ds, ssn):
-    new_ssn = {'ssn' : gen.gen_ssn()}
-    return json.dumps(new_ssn)
+    # new_ssn = {'ssn' : gen.gen_ssn()}
+    ssn_from_queue = g.r.rpop('ssn_feed')
+    if ssn_from_queue:
+        ssn_from_queue = ssn_from_queue.decode('UTF-8')
+        r1 = ssn_from_queue[:3]
+        r2 = ssn_from_queue[4:6]
+        r3 = ssn_from_queue[5:9]
+        new_ssn_value = r1 + '-' + r2 + '-' + r3
+        new_ssn = {'ssn' : new_ssn_value}
+        return json.dumps(new_ssn)
+    else:
+        return "Error: SSN feed queue is empty"
 
 @app.route("/dataset/<ds>/address/<path:address>")
 @cache(_address1_keyfun)
@@ -158,7 +168,7 @@ def emailaddress(ds, emailaddress):
 if __name__ == "__main__":
     app.debug = True
     app.config.update(
-        REDIS_HOST=os.environ.get("REDIS_HOST", "localhost"),
+        REDIS_HOST=os.environ.get("REDIS_HOST", "vap3253.amerus.corp.tld"),
         REDIS_PORT=int(os.environ.get("REDIS_PORT", 6379)),
         REDIS_DB=int(os.environ.get("REDIS_DB", 0))
     )
