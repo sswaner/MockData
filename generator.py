@@ -402,16 +402,17 @@ def gen_ssn(region = False):
     part_3 = random.randrange(1000, 9999)
     return str(part_1) + "-" + str(part_2) + "-" + str(part_3)
 
-def gen_bank_account():
+def gen_bank_account(numeric_only = False):
     """Returns a random bank account number between 9 and 14 characters in 
     length.  Some values have an appeneded text string."""
     num_len = random.randrange(7, 12)
     upper_range = int(math.pow(10, num_len)-1)
     account_number = random.randrange(1, upper_range)
-    first_letter_seed = 22  #the percentage of account numbers with 1-2 initial letters.
-    account_number_seed = random.randrange(0, 99)
-    if account_number_seed <= first_letter_seed:
-        account_number = 'AB' + str(account_number)
+    if numeric_only:
+        first_letter_seed = 22  #the percentage of account numbers with 1-2 initial letters.
+        account_number_seed = random.randrange(0, 99)
+        if account_number_seed <= first_letter_seed:
+            account_number = 'AB' + str(account_number)
     return str(account_number)
 
 def gen_drivers_license():

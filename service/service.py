@@ -168,7 +168,7 @@ def emailaddress(ds, emailaddress):
 if __name__ == "__main__":
     app.debug = True
     app.config.update(
-        REDIS_HOST=os.environ.get("REDIS_HOST", "vap3253.amerus.corp.tld"),
+        REDIS_HOST=os.environ.get("REDIS_HOST", "LOCALHOST"),
         REDIS_PORT=int(os.environ.get("REDIS_PORT", 6379)),
         REDIS_DB=int(os.environ.get("REDIS_DB", 0))
     )
