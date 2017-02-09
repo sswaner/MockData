@@ -121,11 +121,11 @@ def ssn(ds, ssn):
     ssn_from_queue = g.r.rpop('ssn_feed')
     if ssn_from_queue:
         ssn_from_queue = ssn_from_queue.decode('UTF-8')
-        r1 = ssn_from_queue[:3]
-        r2 = ssn_from_queue[4:6]
-        r3 = ssn_from_queue[5:9]
-        new_ssn_value = r1 + '-' + r2 + '-' + r3
-        new_ssn = {'ssn' : new_ssn_value}
+        # r1 = ssn_from_queue[:3]
+        # r2 = ssn_from_queue[3:5]
+        # r3 = ssn_from_queue[5:9]
+        # new_ssn_value = r1 + '-' + r2 + '-' + r3
+        new_ssn = {'ssn' : ssn_from_queue}
         return json.dumps(new_ssn)
     else:
         return "Error: SSN feed queue is empty"
